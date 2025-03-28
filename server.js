@@ -7,7 +7,7 @@ const express = require('express');
 const pool = require('./db');
 const http = require('http');
 const { Server } = require('socket.io');
-const tournamentsRouter = require('./routes/tournaments');
+const tournamentsRouter = require('./routes/tournaments'); // Убедись, что этот импорт есть
 
 const app = express();
 const server = http.createServer(app);
@@ -29,24 +29,24 @@ const io = new Server(server, {
 
 // Middleware для обработки CORS вручную
 app.use((req, res, next) => {
-  const allowedOrigins = process.env.NODE_ENV === 'production'
-      ? ['https://1337brackets-frontend-9xfz.vercel.app', 'https://1337brackets-frontend.vercel.app']
-      : ['http://localhost:3001', 'http://127.0.0.1:5500'];
-  const origin = req.headers.origin;
-  console.log(`🔍 Обработка запроса: ${req.method} ${req.path} от ${origin}`);
-  if (allowedOrigins.includes(origin)) {
-      res.setHeader('Access-Control-Allow-Origin', origin);
-  } else {
-      console.log(`🚫 Origin ${origin} не разрешён`);
-  }
-  res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  if (req.method === 'OPTIONS') {
-      console.log(`🔍 Обработка preflight-запроса (OPTIONS) для ${req.path}`);
-      return res.status(200).end();
-  }
-  next();
+    const allowedOrigins = process.env.NODE_ENV === 'production'
+        ? ['https://1337brackets-frontend-9xfz.vercel.app', 'https://1337brackets-frontend.vercel.app']
+        : ['http://localhost:3001', 'http://127.0.0.1:5500'];
+    const origin = req.headers.origin;
+    console.log(`🔍 Обработка запроса: ${req.method} ${req.path} от ${origin}`);
+    if (allowedOrigins.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+    } else {
+        console.log(`🚫 Origin ${origin} не разрешён`);
+    }
+    res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    if (req.method === 'OPTIONS') {
+        console.log(`🔍 Обработка preflight-запроса (OPTIONS) для ${req.path}`);
+        return res.status(200).end();
+    }
+    next();
 });
 
 // Middleware для Express
@@ -74,7 +74,7 @@ app.get('/favicon.png', (req, res) => {
 
 // API-маршруты
 app.use('/api/users', require('./routes/users'));
-app.use('/api/tournaments', tournamentsRouter);
+app.use('/api/tournaments', tournamentsRouter); // Убедись, что эта строка есть
 app.use('/api/teams', require('./routes/teams'));
 app.use('/api/tournamentPlayers', require('./routes/tournamentPlayers'));
 app.use('/api/matches', require('./routes/matches'));
