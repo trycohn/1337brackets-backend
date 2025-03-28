@@ -27,7 +27,7 @@ initializeSocket(server);
 app.use(express.json());
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? 'https://1337brackets-frontend.vercel.app'
+    ? 'https://1337brackets-frontend-9xfz.vercel.app'
     : ['http://localhost:3001', 'http://127.0.0.1:5500'],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
