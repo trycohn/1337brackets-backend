@@ -1,35 +1,46 @@
+// server.js
+
+// Загружаем переменные окружения из файла .env
 require('dotenv').config({ path: __dirname + '/.env' });
 
+// Логируем JWT_SECRET для отладки
 console.log("🔍 Загруженный JWT_SECRET:", process.env.JWT_SECRET);
 
+// Импортируем необходимые модули
 const express = require('express');
 const cors = require('cors');
-const pool = require('./db');
+const pool = require('./db'); // Подключение к базе данных (PostgreSQL)
 const http = require('http');
-const { initializeSocket } = require('./notifications'); // Импорт из нового модуля
+const { initializeSocket } = require('./notifications'); // Импорт функции для инициализации Socket.IO
 const tournamentsRouter = require('./routes/tournaments');
 
+// Создаём Express-приложение
 const app = express();
+
+// Создаём HTTP-сервер на основе Express-приложения
 const server = http.createServer(app);
 
 // Инициализация Socket.IO через модуль notifications
 initializeSocket(server);
 
-// Middleware
-app.use(express.json());
+// Middleware для Express
+app.use(express.json()); // Парсинг JSON-запросов
 app.use(cors({
-  origin: ['http://localhost:3001', 'http://127.0.0.1:5500'],
+  // Настройка CORS для HTTP-запросов
+  origin: process.env.NODE_ENV === 'production'
+    ? 'https://1337brackets-frontend.vercel.app' // URL фронтенда на Vercel
+    : ['http://localhost:3001', 'http://127.0.0.1:5500'], // Локальные URL для разработки
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
 }));
 
-// Тест подключения к базе данных
+// Тестовый маршрут для проверки подключения к базе данных
 app.get('/testdb', async (req, res) => {
   try {
     const result = await pool.query('SELECT NOW()');
     res.json({ status: 'success', time: result.rows[0].now });
   } catch (err) {
-    console.error('Ошибка подключения к базе:', err);
+    console.error('❌ Ошибка подключения к базе:', err);
     res.status(500).json({ status: 'error', message: err.message });
   }
 });
@@ -55,9 +66,10 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Маршрут не найден' });
 });
 
+// Запуск сервера
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, async () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Сервер запущен на порту ${PORT}`);
   try {
     await pool.query('SELECT NOW()');
     console.log('✅ Подключение к базе данных успешно');
