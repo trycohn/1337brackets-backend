@@ -15,40 +15,40 @@ const server = http.createServer(app);
 
 // Настройка CORS для socket.io
 const io = new Server(server, {
-  cors: {
-      origin: process.env.NODE_ENV === 'production'
-          ? ['https://1337brackets-frontend-9xfz.vercel.app', 'https://1337brackets-frontend.vercel.app']
-          : ['http://localhost:3001', 'http://127.0.0.1:5500'],
-      methods: ['GET', 'POST'],
-      credentials: true,
-      allowedHeaders: ['Content-Type', 'Authorization'],
-  },
-  // Дополнительные настройки для Vercel
-  path: '/socket.io',
-  transports: ['websocket', 'polling'],
-  allowEIO3: true,
+    cors: {
+        origin: process.env.NODE_ENV === 'production'
+            ? ['https://1337brackets-frontend-9xfz.vercel.app', 'https://1337brackets-frontend.vercel.app']
+            : ['http://localhost:3001', 'http://127.0.0.1:5500'],
+        methods: ['GET', 'POST'],
+        credentials: true,
+        allowedHeaders: ['Content-Type', 'Authorization'],
+    },
+    path: '/socket.io',
+    transports: ['websocket', 'polling'],
+    allowEIO3: true,
+});
+
+// Middleware для обработки CORS вручную
+app.use((req, res, next) => {
+    const allowedOrigins = process.env.NODE_ENV === 'production'
+        ? ['https://1337brackets-frontend-9xfz.vercel.app', 'https://1337brackets-frontend.vercel.app']
+        : ['http://localhost:3001', 'http://127.0.0.1:5500'];
+    const origin = req.headers.origin;
+    if (allowedOrigins.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+    }
+    res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    // Обработка preflight-запросов (OPTIONS)
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+    next();
 });
 
 // Middleware для Express
 app.use(express.json());
-app.use(cors({
-    origin: process.env.NODE_ENV === 'production'
-        ? ['https://1337brackets-frontend-9xfz.vercel.app', 'https://1337brackets-frontend.vercel.app']
-        : ['http://localhost:3001', 'http://127.0.0.1:5500'],
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization'],
-}));
-
-// Добавляем middleware для обработки preflight-запросов (OPTIONS)
-app.options('*', cors({
-    origin: process.env.NODE_ENV === 'production'
-        ? ['https://1337brackets-frontend-9xfz.vercel.app', 'https://1337brackets-frontend.vercel.app']
-        : ['http://localhost:3001', 'http://127.0.0.1:5500'],
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization'],
-}));
 
 // Тестовый маршрут для проверки подключения к базе данных
 app.get('/testdb', async (req, res) => {
