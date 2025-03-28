@@ -9,9 +9,9 @@ console.log("🔍 Загруженный JWT_SECRET:", process.env.JWT_SECRET);
 // Импортируем необходимые модули
 const express = require('express');
 const cors = require('cors');
-const pool = require('./db'); // Подключение к базе данных (PostgreSQL)
+const pool = require('./db');
 const http = require('http');
-const { initializeSocket } = require('./notifications'); // Импорт функции для инициализации Socket.IO
+const { initializeSocket } = require('./notifications');
 const tournamentsRouter = require('./routes/tournaments');
 
 // Создаём Express-приложение
@@ -24,12 +24,11 @@ const server = http.createServer(app);
 initializeSocket(server);
 
 // Middleware для Express
-app.use(express.json()); // Парсинг JSON-запросов
+app.use(express.json());
 app.use(cors({
-  // Настройка CORS для HTTP-запросов
   origin: process.env.NODE_ENV === 'production'
-    ? 'https://1337brackets-frontend.vercel.app' // URL фронтенда на Vercel
-    : ['http://localhost:3001', 'http://127.0.0.1:5500'], // Локальные URL для разработки
+    ? 'https://1337brackets-frontend.vercel.app'
+    : ['http://localhost:3001', 'http://127.0.0.1:5500'],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
 }));
@@ -45,6 +44,15 @@ app.get('/testdb', async (req, res) => {
   }
 });
 
+// Обработка запросов к /favicon.ico и /favicon.png
+app.get('/favicon.ico', (req, res) => {
+  res.status(204).end(); // Возвращаем пустой ответ (No Content)
+});
+
+app.get('/favicon.png', (req, res) => {
+  res.status(204).end(); // Возвращаем пустой ответ (No Content)
+});
+
 // API-маршруты
 app.use('/api/users', require('./routes/users'));
 app.use('/api/tournaments', tournamentsRouter);
@@ -56,13 +64,13 @@ app.use('/api/notifications', require('./routes/notifications'));
 
 // Общий обработчик 404 для /api (после всех маршрутов)
 app.use('/api', (req, res) => {
-  console.log(`404 для пути: ${req.path}`); // Отладка
+  console.log(`404 для пути: ${req.path}`);
   res.status(404).json({ error: 'API маршрут не найден' });
 });
 
 // Общий обработчик 404 для всех остальных путей
 app.use((req, res) => {
-  console.log(`404 для пути: ${req.path}`); // Отладка
+  console.log(`404 для пути: ${req.path}`);
   res.status(404).json({ error: 'Маршрут не найден' });
 });
 
@@ -72,7 +80,7 @@ server.listen(PORT, async () => {
   console.log(`🚀 Сервер запущен на порту ${PORT}`);
   try {
     await pool.query('SELECT NOW()');
-    console.log('✅ Подключение к базе данных успешно');
+    console.log('✅ Успешное подключение к базе данных');
   } catch (err) {
     console.error('❌ Ошибка подключения к базе данных:', err.message);
   }
