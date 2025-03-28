@@ -4,7 +4,6 @@ require('dotenv').config({ path: __dirname + '/.env' });
 console.log("🔍 Загруженный JWT_SECRET:", process.env.JWT_SECRET);
 
 const express = require('express');
-const cors = require('cors');
 const pool = require('./db');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -34,14 +33,18 @@ app.use((req, res, next) => {
         ? ['https://1337brackets-frontend-9xfz.vercel.app', 'https://1337brackets-frontend.vercel.app']
         : ['http://localhost:3001', 'http://127.0.0.1:5500'];
     const origin = req.headers.origin;
+    console.log(`🔍 Обработка запроса: ${req.method} ${req.path} от ${origin}`);
     if (allowedOrigins.includes(origin)) {
         res.setHeader('Access-Control-Allow-Origin', origin);
+    } else {
+        console.log(`🚫 Origin ${origin} не разрешён`);
     }
-    res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     // Обработка preflight-запросов (OPTIONS)
     if (req.method === 'OPTIONS') {
+        console.log(`🔍 Обработка preflight-запроса (OPTIONS) для ${req.path}`);
         return res.status(200).end();
     }
     next();
