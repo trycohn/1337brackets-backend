@@ -15,23 +15,39 @@ const server = http.createServer(app);
 
 // Настройка CORS для socket.io
 const io = new Server(server, {
-    cors: {
-        origin: process.env.NODE_ENV === 'production'
-            ? 'https://1337brackets-frontend-9xfz.vercel.app'
-            : ['http://localhost:3001', 'http://127.0.0.1:5500'],
-        methods: ['GET', 'POST'],
-        credentials: true,
-    },
+  cors: {
+      origin: process.env.NODE_ENV === 'production'
+          ? ['https://1337brackets-frontend-9xfz.vercel.app', 'https://1337brackets-frontend.vercel.app']
+          : ['http://localhost:3001', 'http://127.0.0.1:5500'],
+      methods: ['GET', 'POST'],
+      credentials: true,
+      allowedHeaders: ['Content-Type', 'Authorization'],
+  },
+  // Дополнительные настройки для Vercel
+  path: '/socket.io',
+  transports: ['websocket', 'polling'],
+  allowEIO3: true,
 });
 
 // Middleware для Express
 app.use(express.json());
 app.use(cors({
     origin: process.env.NODE_ENV === 'production'
-        ? 'https://1337brackets-frontend-9xfz.vercel.app'
+        ? ['https://1337brackets-frontend-9xfz.vercel.app', 'https://1337brackets-frontend.vercel.app']
         : ['http://localhost:3001', 'http://127.0.0.1:5500'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+// Добавляем middleware для обработки preflight-запросов (OPTIONS)
+app.options('*', cors({
+    origin: process.env.NODE_ENV === 'production'
+        ? ['https://1337brackets-frontend-9xfz.vercel.app', 'https://1337brackets-frontend.vercel.app']
+        : ['http://localhost:3001', 'http://127.0.0.1:5500'],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 // Тестовый маршрут для проверки подключения к базе данных
@@ -43,6 +59,15 @@ app.get('/testdb', async (req, res) => {
         console.error('❌ Ошибка подключения к базе:', err);
         res.status(500).json({ status: 'error', message: err.message });
     }
+});
+
+// Обработка favicon.ico и favicon.png
+app.get('/favicon.ico', (req, res) => {
+    res.status(204).end();
+});
+
+app.get('/favicon.png', (req, res) => {
+    res.status(204).end();
 });
 
 // API-маршруты
